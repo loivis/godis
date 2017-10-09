@@ -1,15 +1,14 @@
 package utils
 
 import (
-	"errors"
 	"net"
 )
 
 // HostIP ...
-func HostIP() (string, error) {
+func HostIP() string {
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return "", err
+		CheckError(err)
 	}
 	for _, iface := range ifaces {
 		if iface.Flags&net.FlagUp == 0 {
@@ -20,7 +19,7 @@ func HostIP() (string, error) {
 		}
 		addrs, err := iface.Addrs()
 		if err != nil {
-			return "", err
+			CheckError(err)
 		}
 		for _, addr := range addrs {
 			var ip net.IP
@@ -37,8 +36,8 @@ func HostIP() (string, error) {
 			if ip == nil {
 				continue // not an ipv4 address
 			}
-			return ip.String(), nil
+			return ip.String()
 		}
 	}
-	return "", errors.New("are you connected to the network?")
+	return ""
 }

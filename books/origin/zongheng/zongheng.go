@@ -44,19 +44,22 @@ func reset(link string) {
 func bookList(link string) {
 	fmt.Println(link)
 	resp, _ := soup.Get(link)
-	// println(resp)
 	doc := soup.HTMLParse(resp)
-	books := doc.Find("ul", "class", "main_con").FindAll("li")[:11]
+	books := doc.Find("ul", "class", "main_con").FindAll("li")[:1]
 	for _, book := range books {
 		if _, ok := book.Attrs()["class"]; !ok {
 			bookName := book.Find("a", "class", "fs14").Text()
 			bookLink := book.Find("a", "class", "fs14").Attrs()["href"]
+			wordCount := utils.TrimAtoi(book.Find("span", "class", "number").Text())
 			author := book.Find("span", "class", "author").Find("a").Text()
 			authorLink := book.Find("span", "class", "author").Find("a").Attrs()["href"]
 			category := book.Find("span", "class", "kind").Find("a").Text()
-			fmt.Println(bookName, bookLink, author, authorLink, category)
+			resp, _ := soup.Get(bookLink)
+			doc := soup.HTMLParse(resp)
+			cover := doc.Find("div", "class", "book_cover fl").Find("img").Attrs()["src"]
+			fmt.Println(bookName, bookLink, author, authorLink, category, wordCount, cover)
 
-			mongoHost, _ := utils.HostIP()
+			mongoHost := utils.HostIP()
 			session, err := mgo.Dial(mongoHost)
 			utils.CheckError(err)
 			defer session.Close()
@@ -66,9 +69,11 @@ func bookList(link string) {
 				"$set": bson.M{
 					"name":        bookName,
 					"link":        bookLink,
+					"cover":       cover,
 					"author":      author,
 					"author_link": authorLink,
 					"category":    category,
+					"word_count":  wordCount,
 					"site":        "纵横中文网"}}
 			_, err = c.Upsert(query, change)
 			utils.CheckError(err)
@@ -86,20 +91,21 @@ func chapterList(link string) {
 	bookName := doc.Find("div", "class", "tc txt").Find("h1").Text()
 	chapters := doc.FindAll("td", "class", "chapterBean")
 	chaptersD := bson.D{}
-	for _, chapter := range chapters {
+	for i, chapter := range chapters {
 		chapterName := normalizeKey(chapter.Attrs()["chaptername"])
 		updateTime := chapter.Attrs()["updatetime"]
 		chapterLink := chapter.Find("a").Attrs()["href"]
 		vip := chapter.Find("em", "class", "vip")
 		fmt.Println(bookName, chapterName, updateTime, chapterLink)
 		chaptersD = append(chaptersD, bson.DocElem{
-			Name: chapterName,
+			Name: strconv.Itoa(i + 1),
 			Value: bson.M{
+				"name":        chapterName,
 				"update_time": updateTime,
 				"link":        chapterLink,
 				"vip":         isVip(vip)}})
 	}
-	mongoHost, _ := utils.HostIP()
+	mongoHost := utils.HostIP()
 	session, err := mgo.Dial(mongoHost)
 	utils.CheckError(err)
 	defer session.Close()

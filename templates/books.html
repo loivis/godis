@@ -1,0 +1,7 @@
+<html>
+
+{{ range $index, $book := . }}
+<li><strong>{{ $book.Name }}</strong>: {{ $book.Site }} {{ $book.Link }} {{ $book.Author }}</li>
+{{ end }}
+
+</html>
