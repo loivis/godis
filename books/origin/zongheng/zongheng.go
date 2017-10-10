@@ -45,10 +45,11 @@ func bookList(link string) {
 	fmt.Println(link)
 	resp, _ := soup.Get(link)
 	doc := soup.HTMLParse(resp)
-	books := doc.Find("ul", "class", "main_con").FindAll("li")[:1]
+	books := doc.Find("ul", "class", "main_con").FindAll("li")[:3]
 	for _, book := range books {
 		if _, ok := book.Attrs()["class"]; !ok {
 			bookName := book.Find("a", "class", "fs14").Text()
+			bookHash := utils.BookHash(bookName, "纵横中文网")
 			bookLink := book.Find("a", "class", "fs14").Attrs()["href"]
 			wordCount := utils.TrimAtoi(book.Find("span", "class", "number").Text())
 			author := book.Find("span", "class", "author").Find("a").Text()
@@ -68,6 +69,7 @@ func bookList(link string) {
 			change := bson.M{
 				"$set": bson.M{
 					"name":        bookName,
+					"hash":        bookHash,
 					"link":        bookLink,
 					"cover":       cover,
 					"author":      author,
