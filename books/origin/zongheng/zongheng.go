@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/anaskhan96/soup"
+	"github.com/loivis/godis/structs"
 	"github.com/loivis/godis/utils"
-	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -25,7 +25,6 @@ func reset(link string) {
 		fmt.Println("error fetching page: ", link)
 		fmt.Println(err)
 	}
-	// fmt.Println(resp)
 
 	doc := soup.HTMLParse(resp)
 	count, _ := strconv.Atoi(doc.Find("div", "class", "pagenumber pagebar").Attrs()["count"])
@@ -45,7 +44,7 @@ func bookList(link string) {
 	fmt.Println(link)
 	resp, _ := soup.Get(link)
 	doc := soup.HTMLParse(resp)
-	books := doc.Find("ul", "class", "main_con").FindAll("li")[:3]
+	books := doc.Find("ul", "class", "main_con").FindAll("li")[:1]
 	for _, book := range books {
 		if _, ok := book.Attrs()["class"]; !ok {
 			bookName := book.Find("a", "class", "fs14").Text()
@@ -60,67 +59,74 @@ func bookList(link string) {
 			cover := doc.Find("div", "class", "book_cover fl").Find("img").Attrs()["src"]
 			fmt.Println(bookName, bookLink, author, authorLink, category, wordCount, cover)
 
-			mongoHost := utils.HostIP()
-			session, err := mgo.Dial(mongoHost)
-			utils.CheckError(err)
+			session := utils.MongoSession()
 			defer session.Close()
 			c := session.DB("godis").C("books")
 			query := bson.M{"name": bookName, "site": "纵横中文网"}
 			change := bson.M{
 				"$set": bson.M{
 					"name":        bookName,
+					"site":        "纵横中文网",
 					"hash":        bookHash,
 					"link":        bookLink,
 					"cover":       cover,
 					"author":      author,
 					"author_link": authorLink,
 					"category":    category,
-					"word_count":  wordCount,
-					"site":        "纵横中文网"}}
-			_, err = c.Upsert(query, change)
+					"word_count":  wordCount}}
+			_, err := c.Upsert(query, change)
 			utils.CheckError(err)
 			chapterLink := strings.Replace(bookLink, "/book/", "/showchapter/", -1)
-			chapterList(chapterLink)
+			updateTime := chapterList(bookName, chapterLink)
+			fmt.Println(updateTime, lastUpdate())
 			time.Sleep(time.Duration(utils.RandomInt(7, 13)) * time.Second)
 		}
 	}
 }
 
-func chapterList(link string) {
+func chapterList(name, link string) int {
+	var updateTime int
 	fmt.Println(link)
 	resp, _ := soup.Get(link)
 	doc := soup.HTMLParse(resp)
-	bookName := doc.Find("div", "class", "tc txt").Find("h1").Text()
 	chapters := doc.FindAll("td", "class", "chapterBean")
-	chaptersD := bson.D{}
-	for i, chapter := range chapters {
+	chaptersD := []bson.M{}
+	for _, chapter := range chapters {
 		chapterName := normalizeKey(chapter.Attrs()["chaptername"])
-		updateTime := chapter.Attrs()["updatetime"]
+		updateTime = utils.TrimAtoi(chapter.Attrs()["updatetime"]) / 1e3
 		chapterLink := chapter.Find("a").Attrs()["href"]
 		vip := chapter.Find("em", "class", "vip")
-		fmt.Println(bookName, chapterName, updateTime, chapterLink)
-		chaptersD = append(chaptersD, bson.DocElem{
-			Name: strconv.Itoa(i + 1),
-			Value: bson.M{
-				"name":        chapterName,
-				"update_time": updateTime,
-				"link":        chapterLink,
-				"vip":         isVip(vip)}})
+		fmt.Println(name, chapterName, updateTime, chapterLink)
+		chaptersD = append(chaptersD, bson.M{
+			"name":        chapterName,
+			"update_time": updateTime,
+			"link":        chapterLink,
+			"vip":         isVip(vip)})
 	}
-	mongoHost := utils.HostIP()
-	session, err := mgo.Dial(mongoHost)
-	utils.CheckError(err)
+
+	session := utils.MongoSession()
 	defer session.Close()
 	c := session.DB("godis").C("books")
-	query := bson.M{"name": bookName, "site": "纵横中文网"}
+	query := bson.M{"name": name, "site": "纵横中文网"}
 	change := bson.M{"$set": bson.M{
-		"name":     bookName,
+		"name":     name,
 		"site":     "纵横中文网",
 		"chapters": chaptersD}}
-	_, err = c.Upsert(query, change)
+	_, err := c.Upsert(query, change)
 	utils.CheckError(err)
+	return updateTime
 }
 
+func lastUpdate() int {
+	session := utils.MongoSession()
+	defer session.Close()
+	c := session.DB("godis").C("sites")
+	query := bson.M{"name": "纵横中文网"}
+	result := structs.Site{}
+	err := c.Find(query).One(&result)
+	utils.CheckError(err)
+	return result.Update
+}
 func normalizeKey(name string) string {
 	return strings.Replace(name, ".", "_", -1)
 }

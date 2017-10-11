@@ -6,14 +6,13 @@ import (
 	"os"
 
 	"github.com/loivis/godis/utils"
-	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
 func renderTemplate() {
 	fmt.Println("### render template")
 
-	session, _ := mgo.Dial(utils.HostIP())
+	session := utils.MongoSession()
 	defer session.Close()
 	c := session.DB("godis").C("sites")
 	query := bson.M{}
