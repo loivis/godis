@@ -2,8 +2,9 @@ package structs
 
 // Site ...
 type Site struct {
-	Name      string
-	Home      string
-	Update    int
-	Copyright bool
+	Name       string
+	Home       string
+	Update     int
+	Copyright  bool
+	LastUpdate int `bson:"last_update"`
 }
