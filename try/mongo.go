@@ -11,7 +11,8 @@ import (
 
 func mongo() {
 	query()
-	key()
+	// insert()
+	updateOne()
 }
 
 func query() {
@@ -27,13 +28,32 @@ func query() {
 
 type doc struct {
 	KeyName string `bson:"key_name"`
+	Fruits  []fruit
 }
 
-func key() {
+type fruit struct {
+	Name  string
+	Price int
+}
+
+func insert() {
 	fmt.Println("### mongodb key")
 	session := utils.MongoSession()
 	defer session.Close()
 	c := session.DB("test").C("col")
-	doc := doc{KeyName: "key-value"}
+	doc := doc{KeyName: "some-value", Fruits: []fruit{fruit{Name: "apple", Price: 1}, fruit{Name: "banana", Price: 1}}}
 	c.Insert(doc)
+}
+
+func updateOne() {
+	fmt.Println("### update document")
+	session := utils.MongoSession()
+	defer session.Close()
+	c := session.DB("test").C("col")
+	result := doc{}
+	query := bson.M{"_id": bson.ObjectIdHex("59dfd3865a374ac2a32f4c43"), "fruits.name": "apple"}
+	c.Find(query).One(&result)
+	fmt.Println(result)
+	change := bson.M{"$set": bson.M{"fruits.$.price": 111}}
+	c.Upsert(query, change)
 }
