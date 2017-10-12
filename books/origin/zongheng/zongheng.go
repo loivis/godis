@@ -36,7 +36,7 @@ func reset(link string) {
 		pageNumber := strconv.Itoa(index + 1)
 		pageLink := "http://book.zongheng.com/store/c0/c0/b0/u0/p" + pageNumber + "/v9/s9/t0/ALL.html"
 		bookList(pageLink)
-		time.Sleep(time.Duration(utils.RandomInt(7, 13)) * 1000 * time.Microsecond)
+		time.Sleep(time.Duration(utils.RandomInt(7, 13)) * time.Second)
 	}
 }
 
@@ -109,9 +109,10 @@ func chapterList(name, link string) int {
 	c := session.DB("godis").C("books")
 	query := bson.M{"name": name, "site": "纵横中文网"}
 	change := bson.M{"$set": bson.M{
-		"name":     name,
-		"site":     "纵横中文网",
-		"chapters": chaptersD}}
+		"name":        name,
+		"site":        "纵横中文网",
+		"last_update": updateTime,
+		"chapters":    chaptersD}}
 	_, err := c.Upsert(query, change)
 	utils.CheckError(err)
 	return updateTime

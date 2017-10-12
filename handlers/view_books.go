@@ -19,6 +19,6 @@ func ViewBooks(w http.ResponseWriter, r *http.Request) {
 	err := c.Find(query).All(&result)
 	utils.CheckError(err)
 
-	t := template.Must(template.ParseFiles("templates/view_books.html"))
+	t := template.Must(template.ParseFiles("templates/view_books.html", "templates/header.html"))
 	t.Execute(w, result)
 }

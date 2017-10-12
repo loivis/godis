@@ -23,6 +23,6 @@ func ViewChapters(w http.ResponseWriter, r *http.Request) {
 	result := structs.Book{}
 	c.Find(query).One(&result)
 
-	t := template.Must(template.ParseFiles("templates/view_chapters.html"))
+	t := template.Must(template.ParseFiles("templates/view_chapters.html", "templates/header.html"))
 	t.Execute(w, result.Chapters)
 }

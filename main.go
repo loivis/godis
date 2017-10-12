@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/loivis/godis/books"
-
 	"github.com/anaskhan96/soup"
+	"github.com/loivis/godis/books"
 	"github.com/loivis/godis/routers"
 	"github.com/loivis/godis/utils"
 )
@@ -18,9 +18,9 @@ func init() {
 
 func main() {
 	// try.Run()
-	// books.UpdateOrigin()
-	// os.Exit(0)
-	books.StartCron()
+	books.UpdateOrigin()
+	os.Exit(0)
+	// books.StartCron()
 
 	router := routers.Router()
 	srv := &http.Server{

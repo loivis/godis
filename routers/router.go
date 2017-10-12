@@ -13,6 +13,9 @@ func Router() *mux.Router {
 	r.HandleFunc("/", handlers.Root).Methods("GET")
 	r.HandleFunc("/books", handlers.ViewBooks).Methods("GET")
 	r.HandleFunc("/books/{hash:[0-9]+}", handlers.ViewChapters).Methods("GET")
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	// static resources
+	r.PathPrefix("/css/").Handler(http.StripPrefix("/css/", http.FileServer(http.Dir("static/css"))))
+	r.PathPrefix("/img/").Handler(http.StripPrefix("/img/", http.FileServer(http.Dir("static/img"))))
+	r.PathPrefix("/js/").Handler(http.StripPrefix("/js/", http.FileServer(http.Dir("static/js"))))
 	return r
 }
