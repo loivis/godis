@@ -1,5 +1,9 @@
 package structs
 
+import (
+	"time"
+)
+
 // Book ...
 type Book struct {
 	Name       string
@@ -8,7 +12,7 @@ type Book struct {
 	Author     string
 	AuthorLink string `bson:"author_link"`
 	Hash       int
-	LastUpdate int `bson:"last_update"`
-	WordCount  int `bson:"word_count"`
+	LastUpdate time.Time `bson:"last_update"`
+	WordCount  int       `bson:"word_count"`
 	Chapters   []Chapter
 }

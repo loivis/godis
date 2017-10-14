@@ -41,11 +41,17 @@ func reset(link string) {
 }
 
 func bookList(link string) {
+	var lastUpdateNew time.Time
+	lastUpdate := lastUpdate()
+	fmt.Println("last site update:", lastUpdate)
+	session := utils.MongoSession()
+	defer session.Close()
+
 	fmt.Println(link)
 	resp, _ := soup.Get(link)
 	doc := soup.HTMLParse(resp)
-	books := doc.Find("ul", "class", "main_con").FindAll("li")[:1]
-	for _, book := range books {
+	books := doc.Find("ul", "class", "main_con").FindAll("li")[:]
+	for i, book := range books {
 		if _, ok := book.Attrs()["class"]; !ok {
 			bookName := book.Find("a", "class", "fs14").Text()
 			bookHash := utils.BookHash(bookName, "纵横中文网")
@@ -59,8 +65,6 @@ func bookList(link string) {
 			cover := doc.Find("div", "class", "book_cover fl").Find("img").Attrs()["src"]
 			fmt.Println(bookName, bookLink, author, authorLink, category, wordCount, cover)
 
-			session := utils.MongoSession()
-			defer session.Close()
 			c := session.DB("godis").C("books")
 			query := bson.M{"name": bookName, "site": "纵横中文网"}
 			change := bson.M{
@@ -78,30 +82,51 @@ func bookList(link string) {
 			utils.CheckError(err)
 			chapterLink := strings.Replace(bookLink, "/book/", "/showchapter/", -1)
 			updateTime := chapterList(bookName, chapterLink)
-			fmt.Println(updateTime, lastUpdate())
-			time.Sleep(time.Duration(utils.RandomInt(7, 13)) * time.Second)
+			fmt.Println("last book update:", updateTime)
+			if i == 0 {
+				lastUpdateNew = updateTime
+			}
+			if !updateTime.After(lastUpdate) {
+				fmt.Println("reached last book update:", lastUpdate)
+				break
+			}
+			if i != len(books)-1 {
+				duration := time.Duration(utils.RandomInt(7, 13)) * time.Second
+				fmt.Printf("sleep %s to continue\n", duration)
+				time.Sleep(duration)
+			}
 		}
 	}
+	c := session.DB("godis").C("sites")
+	query := bson.M{"name": "纵横中文网"}
+	change := bson.M{"$set": bson.M{
+		"name":        "纵横中文网",
+		"last_update": lastUpdateNew}}
+	_, err := c.Upsert(query, change)
+	utils.CheckError(err)
 }
 
-func chapterList(name, link string) int {
-	var updateTime int
+func chapterList(name, link string) time.Time {
+	var lastUpdate time.Time
 	fmt.Println(link)
 	resp, _ := soup.Get(link)
 	doc := soup.HTMLParse(resp)
 	chapters := doc.FindAll("td", "class", "chapterBean")
-	chaptersD := []bson.M{}
+	chaptersM := []bson.M{}
 	for _, chapter := range chapters {
-		chapterName := normalizeKey(chapter.Attrs()["chaptername"])
-		updateTime = utils.TrimAtoi(chapter.Attrs()["updatetime"]) / 1e3
+		chapterName := chapter.Attrs()["chaptername"]
+		updateTime := chapter.Attrs()["updatetime"][:len(chapter.Attrs()["updatetime"])-3]
+		lastUpdate = time.Unix(int64(utils.TrimAtoi(updateTime)), 0)
+		wordCount := utils.TrimAtoi(chapter.Attrs()["wordnum"])
 		chapterLink := chapter.Find("a").Attrs()["href"]
 		vip := chapter.Find("em", "class", "vip")
-		fmt.Println(name, chapterName, updateTime, chapterLink)
-		chaptersD = append(chaptersD, bson.M{
+		// fmt.Println(name, chapterName, lastUpdate, chapterLink)
+		chaptersM = append(chaptersM, bson.M{
 			"name":        chapterName,
-			"update_time": updateTime,
+			"update_time": lastUpdate,
 			"link":        chapterLink,
-			"vip":         isVip(vip)})
+			"vip":         isVip(vip),
+			"word_count":  wordCount})
 	}
 
 	session := utils.MongoSession()
@@ -111,14 +136,15 @@ func chapterList(name, link string) int {
 	change := bson.M{"$set": bson.M{
 		"name":        name,
 		"site":        "纵横中文网",
-		"last_update": updateTime,
-		"chapters":    chaptersD}}
+		"last_update": lastUpdate,
+		"chapters":    chaptersM}}
 	_, err := c.Upsert(query, change)
 	utils.CheckError(err)
-	return updateTime
+	fmt.Println(len(chaptersM), "chapters updated")
+	return lastUpdate
 }
 
-func lastUpdate() int {
+func lastUpdate() time.Time {
 	session := utils.MongoSession()
 	defer session.Close()
 	c := session.DB("godis").C("sites")
@@ -126,10 +152,7 @@ func lastUpdate() int {
 	result := structs.Site{}
 	err := c.Find(query).One(&result)
 	utils.CheckError(err)
-	return result.Update
-}
-func normalizeKey(name string) string {
-	return strings.Replace(name, ".", "_", -1)
+	return result.LastUpdate
 }
 
 func isVip(root soup.Root) bool {

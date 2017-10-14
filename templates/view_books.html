@@ -1,19 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-
 {{ template "header" }}
 
-<body>
+<h1>
+    <div class="row">
+        <div class="col">
+            <img src="http://mittkok.expressen.se/wp-content/uploads/2017/04/godis-del-636x335.jpg" height="50">
+        </div>
+        <div class="col">hello, godis!</div>
+        <div class="col"></div>
+    </div>
+</h1>
 
-    <h1>Hello, world!</h1>
+<div class="container">
 
-    <div class="container-fluid">
-        {{ range $index, $book := . }}
-        <p class="text">
-            <a href="books/{{$book.Hash}}"><strong>{{ $book.Name }}</strong></a> {{ $book.Site }} {{ $book.Author }}</p>
-        {{ end }}
+    {{ range $index, $book := . }}
+
+    <div class="row">
+        <div class="col-8">
+            <a href="books/{{ $book.Hash }}" target="_blank">{{ $book.Name }}</a>
+        </div>
+        <div class="col">
+            <a href="{{ $book.Link }}" target="_blank">{{ $book.Site }}</a>
+        </div>
+        <div class="col">
+            <a href="{{ $book.AuthorLink }}">{{ $book.Author }}</a>
+        </div>
     </div>
 
-</body>
+    {{ end }}
 
-</html>
+</div>
+
+{{ template "footer" }}

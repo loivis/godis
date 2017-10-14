@@ -9,7 +9,6 @@ import (
 	"github.com/anaskhan96/soup"
 	"github.com/loivis/godis/books"
 	"github.com/loivis/godis/routers"
-	"github.com/loivis/godis/try"
 	"github.com/loivis/godis/utils"
 )
 
@@ -18,7 +17,8 @@ func init() {
 }
 
 func main() {
-	try.Run()
+	// try.Run()
+	// os.Exit(0)
 	books.UpdateOrigin()
 	os.Exit(0)
 	// books.StartCron()

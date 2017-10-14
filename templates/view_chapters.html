@@ -1,18 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-
 {{ template "header" }}
 
-<body>
+<h1>{{ .Name }}</h1>
 
-    <h1>Hello, world!</h1>
+<div class="container">
 
-    <body>
-        {{range $key, $value := . }}
-        <p>{{ $key }}: {{ $value.Name }}</p>
-        {{end}}
-    </body>
+    {{range $_, $chapter := .Chapters }}
 
-</body>
+    <div class="row">
+        <div class="col-9">
+            <a href="{{ $chapter.Link }}" target="_blank">{{ $chapter.Name }}</a> {{ if $chapter.Vip }}
+            <span class="vip">V</span> {{ end }}
+        </div>
+        <div class="col-1">{{ $chapter.WordCount}}</div>
+        <div class="col-2">{{ $chapter.UpdateTime.Format "2006-01-02 15:04"}}</div>
+    </div>
 
-</html>
+    {{end}}
+
+</div>
+
+{{ template "footer" }}
