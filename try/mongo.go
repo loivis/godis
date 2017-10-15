@@ -1,7 +1,7 @@
 package try
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/loivis/godis/structs"
 
@@ -16,14 +16,14 @@ func mongo() {
 }
 
 func query() {
-	fmt.Println("### mongodb query")
+	log.Println("### mongodb query")
 	session := utils.MongoSession()
 	defer session.Close()
 	c := session.DB("godis").C("sites")
 	result := structs.Site{}
 	err := c.Find(bson.M{}).One(&result)
 	utils.CheckError(err)
-	fmt.Println(result)
+	log.Println(result)
 }
 
 type doc struct {
@@ -37,7 +37,7 @@ type fruit struct {
 }
 
 func insert() {
-	fmt.Println("### mongodb key")
+	log.Println("### mongodb key")
 	session := utils.MongoSession()
 	defer session.Close()
 	c := session.DB("test").C("col")
@@ -46,14 +46,14 @@ func insert() {
 }
 
 func updateOne() {
-	fmt.Println("### update document")
+	log.Println("### update document")
 	session := utils.MongoSession()
 	defer session.Close()
 	c := session.DB("test").C("col")
 	result := doc{}
 	query := bson.M{"_id": bson.ObjectIdHex("59dfd3865a374ac2a32f4c43"), "fruits.name": "apple"}
 	c.Find(query).One(&result)
-	fmt.Println(result)
+	log.Println(result)
 	change := bson.M{"$set": bson.M{"fruits.$.price": 111}}
 	c.Upsert(query, change)
 }

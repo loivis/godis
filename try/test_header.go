@@ -1,10 +1,13 @@
 package try
 
-import "github.com/anaskhan96/soup"
-import "fmt"
+import (
+	"log"
+
+	"github.com/anaskhan96/soup"
+)
 
 func testHeader() {
-	fmt.Println("### print request header")
+	log.Println("### print request header")
 	resp, _ := soup.Get("http://httpbin.org/headers")
-	fmt.Println(resp)
+	log.Println(resp)
 }

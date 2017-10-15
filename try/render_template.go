@@ -1,8 +1,8 @@
 package try
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"os"
 
 	"github.com/loivis/godis/structs"
@@ -11,7 +11,7 @@ import (
 )
 
 func renderTemplate() {
-	fmt.Println("### render template")
+	log.Println("### render template")
 
 	session := utils.MongoSession()
 	defer session.Close()

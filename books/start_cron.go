@@ -1,8 +1,7 @@
 package books
 
 import (
-	"fmt"
-	"time"
+	"log"
 
 	"github.com/robfig/cron"
 )
@@ -10,9 +9,7 @@ import (
 // StartCron ...
 func StartCron() {
 	c := cron.New()
-	c.AddFunc("@every 5s", func() {
-		time.Sleep(time.Duration(10) * time.Second)
-		fmt.Println(time.Now())
-	})
+	c.AddFunc("@every 5m", UpdateOrigin)
+	log.Println("starting cron job")
 	c.Start()
 }

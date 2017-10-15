@@ -1,7 +1,7 @@
 package try
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/loivis/godis/utils"
 )
@@ -11,6 +11,6 @@ func Run() {
 	testHeader()
 	mongo()
 	renderTemplate()
-	fmt.Println("# print book hash as id")
-	fmt.Println(utils.BookHash("永夜君王", "纵横中文网"))
+	log.Println("# print book hash as id")
+	log.Println(utils.BookHash("永夜君王", "纵横中文网"))
 }

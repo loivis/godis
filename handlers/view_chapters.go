@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/loivis/godis/structs"
@@ -16,7 +16,7 @@ import (
 // ViewChapters ...
 func ViewChapters(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fmt.Println(vars["hash"])
+	log.Println("book id:", vars["hash"])
 	session := utils.MongoSession()
 	c := session.DB("godis").C("books")
 	query := bson.M{"hash": utils.TrimAtoi(vars["hash"])}
