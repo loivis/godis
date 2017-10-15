@@ -59,7 +59,7 @@ func bookList(link string) bool {
 	for _, book := range books {
 		if _, ok := book.Attrs()["class"]; !ok {
 			bookName := book.Find("a", "class", "fs14").Text()
-			bookHash := utils.BookHash(bookName, siteName)
+			hash := utils.Hash(bookName, siteName)
 			bookLink := book.Find("a", "class", "fs14").Attrs()["href"]
 			wordCount := utils.TrimAtoi(book.Find("span", "class", "number").Text())
 			author := book.Find("span", "class", "author").Find("a").Text()
@@ -76,7 +76,7 @@ func bookList(link string) bool {
 				"$set": bson.M{
 					"name":        bookName,
 					"site":        siteName,
-					"hash":        bookHash,
+					"hash":        hash,
 					"link":        bookLink,
 					"cover":       cover,
 					"author":      author,
@@ -118,22 +118,24 @@ func chapterList(name, link string) time.Time {
 	log.Println(link)
 	resp, _ := soup.Get(link)
 	doc := soup.HTMLParse(resp)
-	chapters := doc.FindAll("td", "class", "chapterBean")
-	chaptersM := []bson.M{}
-	for _, chapter := range chapters {
+	chapterList := doc.FindAll("td", "class", "chapterBean")
+	chapters := []bson.M{}
+	for _, chapter := range chapterList {
 		chapterName := chapter.Attrs()["chaptername"]
 		updateTime := chapter.Attrs()["updatetime"][:len(chapter.Attrs()["updatetime"])-3]
 		lastUpdate = time.Unix(int64(utils.TrimAtoi(updateTime)), 0)
 		wordCount := utils.TrimAtoi(chapter.Attrs()["wordnum"])
 		chapterLink := chapter.Find("a").Attrs()["href"]
+		hash := utils.Hash(chapterName)
 		vip := chapter.Find("em", "class", "vip")
 		// log.Println(name, chapterName, lastUpdate, chapterLink)
-		chaptersM = append(chaptersM, bson.M{
+		chapters = append(chapters, bson.M{
 			"name":        chapterName,
 			"update_time": lastUpdate,
 			"link":        chapterLink,
 			"vip":         isVip(vip),
-			"word_count":  wordCount})
+			"word_count":  wordCount,
+			"hash":        hash})
 	}
 
 	session := utils.MongoSession()
@@ -144,10 +146,10 @@ func chapterList(name, link string) time.Time {
 		"name":        name,
 		"site":        siteName,
 		"last_update": lastUpdate,
-		"chapters":    chaptersM}}
+		"chapters":    chapters}}
 	_, err := c.Upsert(query, change)
 	utils.CheckError(err)
-	log.Println(len(chaptersM), "chapters in total")
+	log.Println(len(chapters), "chapterList in total")
 	return lastUpdate
 }
 

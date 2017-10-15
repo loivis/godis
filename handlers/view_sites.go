@@ -9,15 +9,15 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// Root ...
-func Root(w http.ResponseWriter, r *http.Request) {
+// ViewSites ...
+func ViewSites(w http.ResponseWriter, r *http.Request) {
 	session := utils.MongoSession()
 	defer session.Close()
-	c := session.DB("godis").C("books")
+	c := session.DB("godis").C("sites")
 	query := bson.M{}
-	result := []structs.Book{}
+	result := []structs.Site{}
 	c.Find(query).All(&result)
 
-	t := template.Must(template.ParseFiles("templates/books.html"))
+	t := template.Must(template.ParseFiles("templates/view_sites.html", "templates/header.html", "templates/footer.html"))
 	t.Execute(w, result)
 }

@@ -10,15 +10,23 @@
         <div class="col-2">更新时间</div>
     </div>
 
-    {{range $_, $chapter := .Chapters }}
+    {{range $index, $chapter := .Chapters }}
 
     <div class="row">
-        <div class="col-9">
+        <div class="col-6">
             <a href="{{ $chapter.Link }}" target="_blank">{{ $chapter.Name }}</a> {{ if $chapter.Vip }}
             <span class="vip">V</span> {{ end }}
         </div>
+        <div class="col"></div>
         <div class="col-1">{{ $chapter.WordCount}}</div>
         <div class="col-2">{{ $chapter.UpdateTime.Format "2006-01-02 15:04"}}</div>
+    </div>
+    <div class="row">
+        <div class="col-1"></div>
+        <div class="col-2">
+            <a href="{{$.Hash}}/{{$index}}/{{$chapter.Hash}}" target="_blank">{{ $.Site }}(原创)</a>
+        </div>
+
     </div>
 
     {{end}}

@@ -4,9 +4,13 @@ import (
 	"hash/fnv"
 )
 
-// BookHash ...
-func BookHash(site, book string) uint32 {
+// Hash ...
+func Hash(args ...string) uint32 {
+	var s string
 	hash := fnv.New32a()
-	hash.Write([]byte(site + book))
+	for _, arg := range args {
+		s += arg
+	}
+	hash.Write([]byte(s))
 	return hash.Sum32()
 }

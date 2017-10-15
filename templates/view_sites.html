@@ -1,0 +1,31 @@
+{{ template "header" }}
+
+<h1>hello, world!</h1>
+
+<div class="container">
+
+    <button type="button" class="btn btn-outline-primary">
+        <span class="fa fa-plus" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="btn btn-primary">
+        <span class="fa fa-minus" aria-hidden="true"></span>
+    </button>
+
+    <div class="row">
+        <div class="col-2">站点</div>
+        <div class="col-2">最后更新</div>
+    </div>
+
+    {{ range $_, $site := . }}
+    <div class="row">
+        <div class="col-2">
+            <a href="{{$site.Home}}">{{$site.Name}}</a>
+            <span>{{if $site.Copyright}}(原创){{end}}</span>
+        </div>
+        <div class="col-2">{{$site.LastUpdate.Format "2006-01-02 15:04"}}</div>
+    </div>
+    {{ end }}
+
+</div>
+
+{{template "footer"}}

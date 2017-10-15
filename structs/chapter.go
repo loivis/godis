@@ -11,4 +11,5 @@ type Chapter struct {
 	UpdateTime time.Time `bson:"update_time"`
 	WordCount  int       `bson:"word_count"`
 	Vip        bool
+	Hash       int
 }
