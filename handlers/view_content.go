@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/loivis/godis/structs"
+	"github.com/loivis/qieshu/structs"
 
-	"github.com/loivis/godis/utils"
+	"github.com/loivis/qieshu/utils"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/gorilla/mux"

@@ -1,7 +1,7 @@
 package books
 
 import (
-	"github.com/loivis/godis/books/origin"
+	"github.com/loivis/qieshu/books/origin"
 )
 
 // UpdateOrigin ...

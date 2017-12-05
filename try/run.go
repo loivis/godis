@@ -3,7 +3,7 @@ package try
 import (
 	"log"
 
-	"github.com/loivis/godis/utils"
+	"github.com/loivis/qieshu/utils"
 )
 
 // Run ...

@@ -4,8 +4,8 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/loivis/godis/structs"
-	"github.com/loivis/godis/utils"
+	"github.com/loivis/qieshu/structs"
+	"github.com/loivis/qieshu/utils"
 	"gopkg.in/mgo.v2/bson"
 )
 

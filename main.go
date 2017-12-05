@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/anaskhan96/soup"
-	"github.com/loivis/godis/books"
-	"github.com/loivis/godis/routers"
-	"github.com/loivis/godis/utils"
+	"github.com/loivis/qieshu/books"
+	"github.com/loivis/qieshu/routers"
+	"github.com/loivis/qieshu/utils"
 )
 
 func init() {

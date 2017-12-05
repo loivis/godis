@@ -1,7 +1,7 @@
 package origin
 
 import (
-	"github.com/loivis/godis/books/origin/zongheng"
+	"github.com/loivis/qieshu/books/origin/zongheng"
 )
 
 // Update ...

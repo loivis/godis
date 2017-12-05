@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/loivis/godis/handlers"
+	"github.com/loivis/qieshu/handlers"
 )
 
 // Router ...
